@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h2>Edit Transaction</h2>
+  <form method="post" class="row" style="gap:10px">
+    <div>
+      <label>Date</label><br>
+      <input type="date" name="tx_date" value="{{ tx.tx_date }}">
+    </div>
+    <div>
+      <label>Type</label><br>
+      <select name="kind">
+        <option value="income" {% if tx.kind == 'income' %}selected{% endif %}>Income</option>
+        <option value="expense" {% if tx.kind == 'expense' %}selected{% endif %}>Expense</option>
+      </select>
+    </div>
+    <div>
+      <label>Category</label><br>
+      <input type="text" name="category" value="{{ tx.category }}">
+    </div>
+    <div>
+      <label>Amount</label><br>
+      <input type="number" step="0.01" min="0" name="amount" value="{{ tx.amount }}">
+    </div>
+    <div style="flex:1 1 200px">
+      <label>Note</label><br>
+      <input type="text" name="note" value="{{ tx.note }}">
+    </div>
+    <div>
+      <button type="submit">Save</button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

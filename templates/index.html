@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <div class="row" style="justify-content:space-between">
+    <div>
+      <h2 style="margin:0">Overview — {{ year }}-{{ "%02d"|format(month) }}</h2>
+      <div style="margin-top:.4rem; display:flex; gap:.5rem;">
+        <a href="{{ url_for('index', year=prev_year, month=prev_month) }}">⟵ Prev</a>
+        <span>•</span>
+        <a href="{{ url_for('index', year=next_year, month=next_month) }}">Next ⟶</a>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div><strong>Income:</strong> ${{ '%.2f' % income }}</div>
+      <div><strong>Expense:</strong> ${{ '%.2f' % expense }}</div>
+      <div><strong>Balance:</strong> ${{ '%.2f' % balance }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Monthly Budget</h3>
+  <form method="post" action="{{ url_for('set_budget') }}" class="row" style="gap:10px; align-items:flex-end">
+    <div>
+      <label>Year</label><br>
+      <input name="year" value="{{ year }}" readonly>
+    </div>
+    <div>
+      <label>Month</label><br>
+      <input name="month" value="{{ month }}" readonly>
+    </div>
+    <div>
+      <label>Budget (USD)</label><br>
+      <input name="budget_amount" type="number" step="0.01" min="0" placeholder="e.g., 1200.00">
+    </div>
+    <div>
+      <button type="submit">Save Budget</button>
+    </div>
+  </form>
+
+  <div style="margin-top:1rem; display:flex; gap:1rem; flex-wrap:wrap">
+    <div><strong>Budget:</strong> ${{ '%.2f' % budget }}</div>
+    <div><strong>Spent:</strong> ${{ '%.2f' % expense }}</div>
+    <div>
+      <strong>Remaining:</strong>
+      {% if remaining is not none %}
+        ${{ '%.2f' % remaining }}
+      {% else %}
+        —
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="progress" style="margin-top:.6rem">
+    <div style="width: {{ progress_pct if progress_pct is not none else 0 }}%"></div>
+  </div>
+  <div style="font-size:.9rem; color:#666; margin-top:.25rem">
+    Used: {{ progress_pct if progress_pct is not none else 0 }}%
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Add Transaction</h3>
+  <form method="post" action="{{ url_for('add') }}" class="row" style="gap:10px">
+    <div>
+      <label>Date</label><br>
+      <input type="date" name="tx_date" value="">
+    </div>
+    <div>
+      <label>Type</label><br>
+      <select name="kind" required>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+    </div>
+    <div>
+      <label>Category</label><br>
+      <input type="text" name="category" placeholder="e.g., Food, Rent" required>
+    </div>
+    <div>
+      <label>Amount</label><br>
+      <input type="number" step="0.01" min="0" name="amount" placeholder="0.00" required>
+    </div>
+    <div style="flex:1 1 200px">
+      <label>Note</label><br>
+      <input type="text" name="note" placeholder="Optional note">
+    </div>
+    <div>
+      <button type="submit">Add</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Transactions</h3>
+  {% if txs %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Note</th>
+        <th style="width:140px">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in txs %}
+      <tr>
+        <td>{{ t.tx_date }}</td>
+        <td>{{ t.kind }}</td>
+        <td>{{ t.category }}</td>
+        <td>${{ '%.2f' % t.amount }}</td>
+        <td>{{ t.note or '' }}</td>
+        <td>
+          <a href="{{ url_for('edit', tx_id=t.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('delete', tx_id=t.id) }}" style="display:inline" onsubmit="return confirm('Delete this transaction?')">
+            <button type="submit" style="background:#e45757">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>No transactions for this month yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
